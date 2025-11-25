@@ -1,0 +1,181 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Compact
+Input = Stream
+Parser = LL
+#RegularDefinitions
+mai: [A-Z]
+min: [a-z]
+digitos: [0-9]
+letraA: ({mai}({min})+ | {min}+)+
+
+linha: "/"/[^\n]*
+
+bloco: \{[^\{\}]*\}
+#Tokens
+identificador: {letraA}(_{digitos}{digitos}*)?
+cint: ([1-9]{digitos}?{digitos}?{digitos}?{digitos}?)|0
+cfloat: (([1-9]{digitos}?{digitos}?{digitos}?{digitos}?)|0)"."({digitos}?{digitos}?{digitos}?{digitos}?[1-9]|0)
+cstring: \"[^\n\"\\]*\" 
+//palavras reservadas
+pr_add        = identificador: "add"
+pr_and        = identificador: "and"
+pr_begin      = identificador: "begin"
+pr_bool       = identificador: "bool"
+pr_count      = identificador: "count"
+pr_delete     = identificador: "delete"
+pr_do         = identificador: "do"
+pr_elementof  = identificador: "elementOf"
+pr_else       = identificador: "else"
+pr_end        = identificador: "end"
+pr_false      = identificador: "false"
+pr_float      = identificador: "float"
+pr_if         = identificador: "if"
+pr_int        = identificador: "int"
+pr_list       = identificador: "list"
+pr_not        = identificador: "not"
+pr_or         = identificador: "or"
+pr_print      = identificador: "print"
+pr_read       = identificador: "read"
+pr_size       = identificador: "size"
+pr_string     = identificador: "string"
+pr_true       = identificador: "true"
+pr_until      = identificador: "until"
+
+//simbolos especiais
+"+"
+"-"
+"*"
+"/"
+"=="
+"~="
+"<"
+">"
+"="
+"<-"
+"("
+")"
+";"
+","
+
+
+//reconhecer e ignorar caracteres de formatacao
+:[\n\t\s]
+
+//reconhecer e ignorar comentarios
+:!{bloco}
+:!{linha}
+#NonTerminals
+<programa>
+<lista_instrucoes> 
+<instrucao>
+<lista_instrucoes1>
+<comando>
+<comando1>
+
+<dec_var>
+<tipo>
+<lista>
+<simples>
+<listaId>
+<listaId1>
+
+<atribuicao>
+<expressao>
+
+<com_manp_lt>
+<add_delete>
+<elemento>
+<posicao>
+
+<com_etr_dados>
+<lista_entrada>
+<lista_entrada1>
+
+<com_sd_dados>
+<lista_expressoes>
+<lista_expressoes1>
+
+<com_sl>
+<com_sl1>
+<lista_comandos>
+<lista_comandos1>
+
+<com_rpt>
+
+<valor>
+<expressao_>
+<relacional>
+<aritmetica>
+<relacional_>
+<operador_relacional>
+<termo>
+<aritmetica_>
+<fator> 
+<termo_>
+<fator_>
+#Grammar
+<programa> ::= #100 pr_begin <lista_instrucoes> pr_end #101 	;
+
+<lista_instrucoes> ::= <instrucao> ";"<lista_instrucoes1> ;
+<lista_instrucoes1> ::= î | <lista_instrucoes> ; 
+
+<instrucao> ::= <dec_var> | <comando> ;
+
+<comando> ::=  identificador #121 <comando1> | <com_etr_dados> | <com_sd_dados> | <com_sl> | <com_rpt> ;
+<comando1> ::= <atribuicao> | <add_delete> ;
+
+<dec_var> ::= <tipo> <listaId> #119 ;
+<tipo> ::=  pr_string #120 | pr_bool #120 | pr_float #120 | pr_int #120 | <lista> ;
+<lista> ::= pr_list "(" <simples> "," cint ")" ;
+
+<simples> ::= pr_string #120 | pr_bool #120 | pr_float #120 | pr_int #120 ; 
+<listaId> ::= identificador #121 <listaId1> ;
+<listaId1> ::= î | "," <listaId> ;
+<atribuicao> ::= "=" <expressao> #122 | "<-" <expressao> #122 ;
+
+
+<com_manp_lt> ::= identificador <add_delete> ;
+<add_delete> ::= pr_add "(" <elemento> "," <posicao> ")" | pr_delete "(" <posicao> ")" ;
+<elemento> ::= <expressao> ;
+<posicao> ::= <expressao> ;
+
+<com_etr_dados> ::= pr_read "(" <lista_entrada> ")" ;
+<lista_entrada> ::= identificador #123 <lista_entrada1> | cstring #124 "," identificador #123 <lista_entrada1> ;
+<lista_entrada1> ::= î | "," <lista_entrada> ;
+
+<com_sd_dados> ::= pr_print "(" <lista_expressoes> ")" #118 ;  
+<lista_expressoes> ::= <expressao> #102 <lista_expressoes1> ;
+<lista_expressoes1> ::= î | "," <lista_expressoes> ;
+
+<com_sl> ::= pr_if <expressao> #125 <lista_comandos> <com_sl1> ;
+<com_sl1> ::= pr_end | pr_else #127 <lista_comandos> pr_end #126 ; 
+<lista_comandos> ::= <comando> ";" <lista_comandos1> ;
+<lista_comandos1> ::= î | <lista_comandos> ;
+
+<com_rpt> ::= pr_do #128 <lista_comandos> pr_until <expressao> #129 ;
+
+<expressao> ::= <valor> <expressao_> ;
+<expressao_> ::= î | pr_and <valor> #113 <expressao_> | pr_or <valor> #114 <expressao_> ;
+<valor> ::= <relacional> | pr_true #115 | pr_false #116 | pr_not <valor> #117 ;
+<relacional> ::= <aritmetica> <relacional_> ;
+<relacional_> ::= î | <operador_relacional> #111 <aritmetica> #112 ;
+<operador_relacional>::= "==" | "~=" | "<" | ">" ;
+<aritmetica> ::= <termo> <aritmetica_> ;
+<aritmetica_> ::= î | "+" <termo> #106 <aritmetica_> | "-" <termo> #107 <aritmetica_> ;
+<termo> ::= <fator> <termo_> ;
+<termo_> ::= î | "*" <fator> #108 <termo_> | "/" <fator> #109 <termo_> ;
+<fator> ::= identificador #130 <fator_> |
+ cint #103 |
+ cfloat #104 |
+ cstring #105 |
+ "(" <expressao> ")" |
+ "+" <fator> |
+ "-" <fator> #110 ;
+<fator_> ::= î | pr_count | pr_size | pr_elementof "(" <expressao> ")" ; 
