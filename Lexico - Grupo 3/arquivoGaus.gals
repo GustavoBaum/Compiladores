@@ -1,0 +1,70 @@
+#Options
+GenerateScanner = true
+GenerateParser = false
+Language = Java
+ScannerName = Lexico
+ScannerCaseSensitive = true
+ScannerTable = Compact
+Input = Stream
+#RegularDefinitions
+mai: [A-Z]
+min: [a-z]
+digitos: [0-9]
+letraA: ({mai}({min})+ | {min}+)+
+
+linha: "/"/[^\n]*
+
+bloco: \{[^\{\}]*\}
+#Tokens
+identificador: {letraA}(_{digitos}{digitos}*)?
+cint: ([1-9]{digitos}?{digitos}?{digitos}?{digitos}?)|0
+cfloat: (([1-9]{digitos}?{digitos}?{digitos}?{digitos}?)|0)"."({digitos}?{digitos}?{digitos}?{digitos}?[1-9]|0)
+cstring: \"[^\n\"\\]*\"
+
+//palavras reservadas
+pr_add        = identificador: "add"
+pr_and        = identificador: "and"
+pr_begin      = identificador: "begin"
+pr_bool       = identificador: "bool"
+pr_count      = identificador: "count"
+pr_delete     = identificador: "delete"
+pr_do         = identificador: "do"
+pr_elementof  = identificador: "elementOf"
+pr_else       = identificador: "else"
+pr_end        = identificador: "end"
+pr_false      = identificador: "false"
+pr_float      = identificador: "float"
+pr_if         = identificador: "if"
+pr_int        = identificador: "int"
+pr_list       = identificador: "list"
+pr_not        = identificador: "not"
+pr_or         = identificador: "or"
+pr_print      = identificador: "print"
+pr_read       = identificador: "read"2
+pr_size       = identificador: "size"
+pr_string     = identificador: "string"
+pr_true       = identificador: "true"
+pr_until      = identificador: "until"
+
+//simbolos especiais
+"+"
+"-"
+"*"
+"/"
+"=="
+"~="
+"<"
+">"
+"="
+"<-"
+"("
+")"
+";"
+","
+
+
+//reconhecer e ignorar caracteres de formatacao
+:[\n\t\s]
+
+//reconhecer e ignorar comentarios
+:!{bloco}
